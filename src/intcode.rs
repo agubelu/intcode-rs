@@ -157,9 +157,9 @@ impl IntcodeComputer {
         let opcode = (self.memory[&self.ip] % 100) as u8;
         let mut flags = self.memory[&self.ip] / 100;
         let n_params = match opcode {
-            Opcodes::END => 0,
-            Opcodes::IN | Opcodes::OUT | Opcodes::RLB => 1,
-            Opcodes::JMP | Opcodes::JMN => 2,
+            Opcodes::END                                            => 0,
+            Opcodes::IN  | Opcodes::OUT | Opcodes::RLB              => 1,
+            Opcodes::JMP | Opcodes::JMN                             => 2,
             Opcodes::ADD | Opcodes::MUL | Opcodes::EQ | Opcodes::LT => 3,
             _ => panic!("Unknown opcode"),
         };
