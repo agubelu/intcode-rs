@@ -22,24 +22,19 @@ pub struct IntcodeComputer {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Internal stuff
 
-// Number of parameters received by every opcode, indexed by the value of the opcode itself.
-static N_PARAMS: [usize; 10] = [0, 3, 3, 1, 1, 2, 2, 3, 3, 1];
-
-type ParamArray = [Param; 3];
-
 // Intcode operation codes.
 struct Opcodes;
 impl Opcodes {
-    pub const ADD: Int = 1;
-    pub const MUL: Int = 2;
-    pub const IN:  Int = 3;
-    pub const OUT: Int = 4;
-    pub const JMP: Int = 5;
-    pub const JMN: Int = 6;
-    pub const LT:  Int = 7;
-    pub const EQ:  Int = 8;
-    pub const RLB: Int = 9;
-    pub const END: Int = 99;
+    pub const ADD: u8 = 1;
+    pub const MUL: u8 = 2;
+    pub const IN:  u8 = 3;
+    pub const OUT: u8 = 4;
+    pub const JMP: u8 = 5;
+    pub const JMN: u8 = 6;
+    pub const LT:  u8 = 7;
+    pub const EQ:  u8 = 8;
+    pub const RLB: u8 = 9;
+    pub const END: u8 = 99;
 }
 
 // Parameter modes
@@ -158,10 +153,16 @@ impl IntcodeComputer {
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    fn parse_operation(&mut self) -> (Int, ParamArray) {
-        let opcode = self.memory[&self.ip] % 100;
+    fn parse_operation(&mut self) -> (u8, [Param; 3]) {
+        let opcode = (self.memory[&self.ip] % 100) as u8;
         let mut flags = self.memory[&self.ip] / 100;
-        let n_params = if opcode == Opcodes::END { 0 } else { N_PARAMS[opcode as usize] };
+        let n_params = match opcode {
+            Opcodes::END => 0,
+            Opcodes::IN | Opcodes::OUT | Opcodes::RLB => 1,
+            Opcodes::JMP | Opcodes::JMN => 2,
+            Opcodes::ADD | Opcodes::MUL | Opcodes::EQ | Opcodes::LT => 3,
+            _ => panic!("Unknown opcode"),
+        };
         let mut params = [Param::default(); 3];
 
         for i in 0..n_params {
